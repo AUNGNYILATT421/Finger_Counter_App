@@ -70,7 +70,7 @@ python test.py
 ## Known issues
 
 - `requirements.txt` pins `mediapipe<1.0.0`. MediaPipe 1.0.0 removed the legacy `mp.solutions` API that `HandTrackingModule.py` relies on, so installing the latest release breaks hand detection at startup (`AttributeError: module 'mediapipe' has no attribute 'solutions'`).
-- `mediapipe` pulls in `opencv-contrib-python` as its own dependency, which installs a `cv2` package alongside the project's own `opencv-python` — both write into the same namespace. `requirements.txt` pins `opencv-python` to the exact version `opencv-contrib-python` resolves to, to keep them in sync; if you bump `mediapipe`, re-check that these two stay aligned.
+- `mediapipe` pulls in `opencv-contrib-python` as its own dependency — this project relies on that rather than declaring a separate `opencv-python`, since `opencv-contrib-python` is a strict superset (same core API plus extra modules) and an additional `opencv-python` entry would just get installed then silently overwritten in the shared `cv2/` namespace. `requirements.txt` pins `opencv-contrib-python` directly so it resolves deterministically instead of drifting to whatever's newest on PyPI; if you bump `mediapipe`, re-check this pin still matches a version it's compatible with.
 - The webcam is opened with `cv2.VideoCapture(0)`, which uses the system's default camera. Change the index if you have multiple cameras and need a different one.
 - `FingerImages/` only has icons for counts 1–6. With two hands the detector can report up to 10 fingers; counts of 0 or above 6 show the number overlay only (no image).
 
