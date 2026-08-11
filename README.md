@@ -29,6 +29,10 @@ A real-time hand-tracking application that detects raised fingers from a webcam 
 - [OpenCV](https://pypi.org/project/opencv-python/) (`opencv-python`)
 - [MediaPipe](https://pypi.org/project/mediapipe/)
 
+## Platform support
+
+Developed and tested on **macOS**. The code has no OS-specific paths or APIs (paths are built with `os.path.join`, camera/GUI calls are plain `cv2`), and every pinned dependency — including the trickier native ones (`mediapipe`, `aiortc`/`av`/`cryptography` used by `streamlit-webrtc`) — publishes prebuilt **Windows** wheels for Python 3.10, so `pip install -r requirements.txt` is expected to succeed there without needing a compiler. That said, it hasn't been run end-to-end on Windows, so treat Windows support as untested-but-expected rather than verified. If `cv2.VideoCapture(0)` opens slowly or fails to find the camera on Windows, try `cv2.VideoCapture(0, cv2.CAP_DSHOW)` in `FingerCounter.py`.
+
 ## Setup
 
 1. Clone or download this repository.
@@ -66,6 +70,7 @@ python test.py
 ## Known issues
 
 - `requirements.txt` pins `mediapipe<1.0.0`. MediaPipe 1.0.0 removed the legacy `mp.solutions` API that `HandTrackingModule.py` relies on, so installing the latest release breaks hand detection at startup (`AttributeError: module 'mediapipe' has no attribute 'solutions'`).
+- `mediapipe` pulls in `opencv-contrib-python` as its own dependency, which installs a `cv2` package alongside the project's own `opencv-python` — both write into the same namespace. `requirements.txt` pins `opencv-python` to the exact version `opencv-contrib-python` resolves to, to keep them in sync; if you bump `mediapipe`, re-check that these two stay aligned.
 - The webcam is opened with `cv2.VideoCapture(0)`, which uses the system's default camera. Change the index if you have multiple cameras and need a different one.
 - `FingerImages/` only has icons for counts 1–6. With two hands the detector can report up to 10 fingers; counts of 0 or above 6 show the number overlay only (no image).
 

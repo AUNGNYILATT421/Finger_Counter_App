@@ -3,7 +3,7 @@ import time
 import os
 import HandTrackingModule as htm
 
-wCam, hCam = 720, 560
+wCam, hCam = 1280, 720
 
 tipIds = [4, 8, 12, 16, 20]
 
@@ -64,8 +64,8 @@ def main():
                 if len(lmList) != 0:
                     totalFingers += fingerCount(lmList, labels[i])
 
-            cv2.rectangle(img, (20, 225), (250, 425), (0, 255, 0), cv2.FILLED)
-            cv2.putText(img, str(totalFingers), (60, 375), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 25)
+            cv2.rectangle(img, (20, 20), (250, 220), (0, 255, 0), cv2.FILLED)
+            cv2.putText(img, str(totalFingers), (60, 170), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 25)
 
         cTime = time.time()
         fps = 1 / (cTime - pTime) if cTime != pTime else 0

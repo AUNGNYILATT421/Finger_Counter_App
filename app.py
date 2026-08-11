@@ -37,8 +37,8 @@ class FingerCountProcessor(VideoProcessorBase):
                 totalFingers += fingerCount(lmList, labels[i])
 
         if totalHands:
-            cv2.rectangle(img, (20, 225), (250, 425), (0, 255, 0), cv2.FILLED)
-            cv2.putText(img, str(totalFingers), (60, 375), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 25)
+            cv2.rectangle(img, (20, 20), (190, 180), (0, 255, 0), cv2.FILLED)
+            cv2.putText(img, str(totalFingers), (60, 140), cv2.FONT_HERSHEY_PLAIN, 7, (255, 0, 0), 25)
 
         cTime = time.time()
         fps = 1 / (cTime - self.pTime) if cTime != self.pTime else 0
@@ -56,5 +56,8 @@ webrtc_streamer(
     key="finger-counter",
     video_processor_factory=FingerCountProcessor,
     rtc_configuration=RTC_CONFIGURATION,
-    media_stream_constraints={"video": True, "audio": False},
+    media_stream_constraints={
+        "video": {"width": {"ideal": 1280}, "height": {"ideal": 720}},
+        "audio": False,
+    },
 )
