@@ -1,0 +1,74 @@
+# Finger Counter
+
+A real-time hand-tracking application that detects raised fingers from a webcam feed and displays the running total on screen. Built with [OpenCV](https://opencv.org/) for video capture/rendering and [MediaPipe](https://google.github.io/mediapipe/) for hand landmark detection, and supports counting fingers on both hands simultaneously.
+
+## How it works
+
+1. **`HandTrackingModule.py`** wraps MediaPipe's `Hands` solution in a `HandDetector` class that:
+   - Detects hands in a frame and draws landmarks (`findHands`)
+   - Reports whether each detected hand is `Left` or `Right` (`classifyHand`)
+   - Returns the pixel coordinates of all 21 landmarks for a given hand (`findPositions`)
+2. **`FingerCounter.py`** drives the webcam loop:
+   - For each of the 5 fingertip landmarks (thumb, index, middle, ring, pinky), it compares the tip position against a lower joint to decide whether the finger is extended.
+   - The thumb is handled specially since its motion is horizontal, and the comparison direction is flipped depending on the hand's label (`Left`/`Right`) so it works correctly no matter which hand is shown or which way it's facing the camera.
+   - The extended-finger count across all detected hands is summed and rendered on the video frame (both as a number and as the matching image from `FingerImages/`), along with a live FPS counter.
+
+## Project structure
+
+```
+.
+├── FingerCounter.py         # Main application entry point (webcam loop, finger-counting logic)
+├── HandTrackingModule.py    # Reusable MediaPipe hand-detection wrapper (HandDetector class)
+└── FingerImages/            # Overlay images (1.jpg – 6.jpg) shown for each finger count
+```
+
+## Requirements
+
+- Python 3.8+
+- A connected webcam
+- [OpenCV](https://pypi.org/project/opencv-python/) (`opencv-python`)
+- [MediaPipe](https://pypi.org/project/mediapipe/)
+
+## Setup
+
+1. Clone or download this repository.
+2. (Recommended) create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate        # Windows: venv\Scripts\activate
+   ```
+3. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Running the app
+
+From the project root:
+
+```bash
+python FingerCounter.py
+```
+
+- A window titled **Image** will open showing the webcam feed with hand landmarks drawn and the current finger count overlaid.
+- Press **Esc** to quit.
+
+## Testing
+
+`test.py` covers the finger-counting math in `FingerCounter.fingerCount` (thumb logic for both hands and both orientation branches, full-fist and full-open poses) and `HandTrackingModule.HandDetector`'s guards and coordinate scaling (using synthetic landmarks, no real webcam/hand image needed). Run it with:
+
+```bash
+python test.py
+```
+
+`FingerCounter.py` now guards its webcam loop behind `if __name__ == "__main__":` so it can be imported by the test suite without opening a camera.
+
+## Known issues
+
+- `requirements.txt` pins `mediapipe<1.0.0`. MediaPipe 1.0.0 removed the legacy `mp.solutions` API that `HandTrackingModule.py` relies on, so installing the latest release breaks hand detection at startup (`AttributeError: module 'mediapipe' has no attribute 'solutions'`).
+- The webcam is opened with `cv2.VideoCapture(0)`, which uses the system's default camera. Change the index if you have multiple cameras and need a different one.
+- `FingerImages/` only has icons for counts 1–6. With two hands the detector can report up to 10 fingers; counts of 0 or above 6 show the number overlay only (no image).
+
+## Deployment notes
+
+This is a local, GUI-based (`cv2.imshow`) desktop script rather than a web service — it must be run on a machine with a display and an accessible webcam, and cannot be deployed to a typical headless server or container without additional work (e.g., replacing the display loop with a streaming/web front end).

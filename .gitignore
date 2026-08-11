@@ -1,0 +1,10 @@
+# Ignore python cache directory
+/__pycache__/
+
+
+# Virtual Environments
+my_env/
+
+
+# Claude
+.claude/
