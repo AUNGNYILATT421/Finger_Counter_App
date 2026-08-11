@@ -76,4 +76,12 @@ python test.py
 
 ## Deployment notes
 
-This is a local, GUI-based (`cv2.imshow`) desktop script rather than a web service — it must be run on a machine with a display and an accessible webcam, and cannot be deployed to a typical headless server or container without additional work (e.g., replacing the display loop with a streaming/web front end).
+`FingerCounter.py` is a local, GUI-based (`cv2.imshow`) desktop script — it must be run on a machine with a display and an accessible webcam.
+
+For deploying as a web app, use **`app.py`** instead: a Streamlit + [`streamlit-webrtc`](https://github.com/whitphx/streamlit-webrtc) front end that streams the viewer's browser webcam to the server for processing, reusing `HandTrackingModule` and `FingerCounter.fingerCount` as-is. Run it locally with:
+
+```bash
+streamlit run app.py
+```
+
+When deploying to **Streamlit Community Cloud**, point it at `app.py`. The full (non-headless) `opencv-python` build that `FingerCounter.py` needs for `cv2.imshow` requires system-level graphics libraries (`libGL.so.1`, etc.) that Streamlit Cloud's minimal container doesn't include by default — without them the deploy fails with `ImportError: libGL.so.1: cannot open shared object file`. `packages.txt` at the repo root lists the apt packages (`libgl1`, `libglib2.0-0`) that Streamlit Cloud installs before the Python build, which fixes this without needing to swap to `opencv-python-headless` (which would break `cv2.imshow` for local desktop use).
